@@ -1,6 +1,7 @@
 // plugins/firebase.js
 import { initializeApp } from "firebase/app"
 import { getFirestore } from "firebase/firestore"
+import { envError } from "../errors"
 
 import type { FirebaseApp } from "firebase/app"
 import type { Firestore } from "firebase/firestore"
@@ -10,18 +11,17 @@ export default defineNitroPlugin((nitroApp) => {
 
 	const firebaseConfig = config.public.firebaseConfig as any
 
-	if (!firebaseConfig.apiKey) {
-		console.error("Firebase connection details are missing. Please add them to the .env file.")
-	}
+	const missingEnvDetails = envError(firebaseConfig)
 
 	let app: FirebaseApp | undefined
 	let db: Firestore | undefined
 
 	try {
-		app = initializeApp(firebaseConfig)
-		db = getFirestore(app)
-
-		console.log("\x1b[32m", "[database-connection] Firebase Connected.", "\x1b[0m")
+		if (!missingEnvDetails) {
+			app = initializeApp(firebaseConfig)
+			db = getFirestore(app)
+			console.log("\x1b[32m", "[database-connection] Firebase Connected.", "\x1b[0m")
+		}
 	} catch (error) {
 		console.error("[database-connection] Error connecting to Firebase.", error)
 	}
