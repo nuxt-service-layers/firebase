@@ -1,17 +1,29 @@
 // plugins/firebase.js
 import { initializeApp } from "firebase/app"
 import { getFirestore } from "firebase/firestore"
-import { envError } from "../errors"
 
 import type { FirebaseApp } from "firebase/app"
 import type { Firestore } from "firebase/firestore"
+
+//TODO: make global
+import { envError } from "../../../base/server/envErrors"
+
+const requiredEnvKeys = [
+	"apiKey",
+	"authDomain",
+	"projectId",
+	"storageBucket",
+	"messagingSenderId",
+	"appId",
+	"measurementId",
+]
 
 export default defineNitroPlugin((nitroApp) => {
 	const config = useRuntimeConfig()
 
 	const firebaseConfig = config.public.firebaseConfig as any
 
-	const missingEnvDetails = envError(firebaseConfig)
+	const missingEnvDetails = envError(requiredEnvKeys, "firebase")
 
 	let app: FirebaseApp | undefined
 	let db: Firestore | undefined
